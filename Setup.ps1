@@ -2,19 +2,28 @@ param(
     [switch]
     $reboot
 )
+$errorActionPreference = 'Stop'
 [String] $moduleRoot = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
 Register-PSRepository -Name xDscDiagnostics -SourceLocation https://ci.appveyor.com/nuget/xDscDiagnostics -ErrorAction SilentlyContinue
 Install-Module xDscDiagnostics -Repository xDscDiagnostics -force
 
 Get-NetAdapter | %{Set-NetConnectionProfile  -InterfaceAlias $_.Name -NetworkCategory Private}
 Set-WSManQuickConfig -Force
+$rebootFile = "$env:SystemDrive\rebooted.txt"
+$failOnceFile = "$env:SystemDrive\failed.txt"
+if($reboot -or @(Get-DscConfigurationStatus -all).where{$_.type -eq 'reboot'}.Status -ne 'Success')
+{
+    throw 'Reboot example has not been setup'
+}
 
 $name = "Example"
 If($reboot)
 {
-    del C:\WINDOWS\System32\Configuration\ConfigurationStatus\*
+    del $rebootFile -ErrorAction SilentlyContinue
+    
     $name +="Reboot"
 }
+del $failOnceFile -ErrorAction SilentlyContinue
 
 configuration $name
 {
@@ -25,18 +34,21 @@ configuration $name
   Script NotInDesiredStateExample
   {
     GetScript = { return @{}}
-    TestScript =  { return $false}
-    SetScript = {throw }
+    TestScript =  { return (Test-path $using:failOnceFile)}
+    SetScript = {
+        ''|Out-File $using:failOnceFile
+        throw 
+    }
   }
   if($reboot)
   {
     Script Reboot
     {
         GetScript = { return @{}}
-        TestScript =  { return (Test-path $env:SystemDrive\rebooted.txt)}
+        TestScript =  { return (Test-path $using:rebootFile)}
         SetScript = {
             $global:DSCMachineStatus = 1 
-            ''|Out-File $env:SystemDrive\rebooted.txt 
+            ''|Out-File $using:rebootFile
         }
     }      
   }
@@ -47,10 +59,14 @@ configuration $name
 }
 
 &$name
-Set-DscLocalConfigurationManager .\$name
-Start-DscConfiguration .\$name -Wait -force
+if($reboot)
+{
+    Set-DscLocalConfigurationManager .\$name
+    del "$env:windir\System32\Configuration\ConfigurationStatus\*" -ErrorAction SilentlyContinue
+}
+Start-DscConfiguration .\$name -Wait -force -ErrorAction SilentlyContinue
 
-Remove-DscConfigurationDocument -Stage Pending
-Remove-DscConfigurationDocument -Stage Current
+# Remove-DscConfigurationDocument -Stage Pending
+# Remove-DscConfigurationDocument -Stage Current
 
 $env:psmodulePath = "$env:psmodulePath;$moduleroot\modules"
