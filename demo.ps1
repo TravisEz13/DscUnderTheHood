@@ -1,8 +1,11 @@
-#Initial setup
+# Initial setup
 import-module xDscDiagnostics
 
+# Get configuration status for all operations
+Get-DscConfigurationStatus -all
+
 # Get the status of the last configuration
-$status = get-dscconfigurationstatus
+$status = @(Get-DscConfigurationStatus -all).where{$_.Type -eq 'Initial'} | Select-Object -First 1
 
 # display the status
 $status
@@ -13,10 +16,19 @@ $status | fl *
 # show the meta configuration
 $status.MetaConfiguration
 
-# Show resource not in derised state
-$status.ResourcesNotInDesiredState
-
 # get the verbose details of the status
+Write-Verbose -Message "JobId: $($status.JobId)" -Verbose
 $status | Get-XDscConfigurationDetail -Verbose
 
-@(Get-DscConfigurationStatus -all).where{$_.Type -eq 'Reboot'} | Get-XDscConfigurationDetail -Verbose 
+# Show all the files backing Get-ConfigurationStatus for this job
+dir "C:\WINDOWS\System32\Configuration\ConfigurationStatus\$($status.JobId)*"
+
+# get the status for a reboot example
+$status = @(Get-DscConfigurationStatus -all).where{$_.Type -eq 'Reboot'}  
+
+# get the verbose details for the reboot example
+Write-Verbose -Message "JobId: $($status.JobId)" -Verbose
+$status | Get-XDscConfigurationDetail -Verbose 
+
+# Show resource not in derised state
+$status.ResourcesNotInDesiredState

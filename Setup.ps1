@@ -3,27 +3,25 @@ param(
     $reboot
 )
 $errorActionPreference = 'Stop'
-[String] $moduleRoot = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
-Register-PSRepository -Name xDscDiagnostics -SourceLocation https://ci.appveyor.com/nuget/xDscDiagnostics -ErrorAction SilentlyContinue
-Install-Module xDscDiagnostics -Repository xDscDiagnostics -force
-
-Get-NetAdapter | %{Set-NetConnectionProfile  -InterfaceAlias $_.Name -NetworkCategory Private}
-Set-WSManQuickConfig -Force
+. .\Init.ps1
 $rebootFile = "$env:SystemDrive\rebooted.txt"
 $failOnceFile = "$env:SystemDrive\failed.txt"
 if(!$reboot -and @(Get-DscConfigurationStatus -all).where{$_.type -eq 'reboot'}.Status -ne 'Success')
 {
     throw 'Reboot example has not been setup'
 }
+if(!$reboot -and @(Get-DscConfigurationStatus -all).where{$_.type -eq 'Initial'}.Count -ge 2)
+{
+    throw 'Non-Reboot example has been setup'
+}
 
 $name = "Example"
 If($reboot)
 {
     del $rebootFile -ErrorAction SilentlyContinue
-    
+    del $failOnceFile -ErrorAction SilentlyContinue    
     $name +="Reboot"
 }
-del $failOnceFile -ErrorAction SilentlyContinue
 
 configuration $name
 {
@@ -69,4 +67,3 @@ Start-DscConfiguration .\$name -Wait -force -ErrorAction SilentlyContinue
 # Remove-DscConfigurationDocument -Stage Pending
 # Remove-DscConfigurationDocument -Stage Current
 
-$env:psmodulePath = "$env:psmodulePath;$moduleroot\modules"
