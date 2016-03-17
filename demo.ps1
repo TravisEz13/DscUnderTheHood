@@ -30,5 +30,8 @@ $status = @(Get-DscConfigurationStatus -all).where{$_.Type -eq 'Reboot'}
 Write-Verbose -Message "JobId: $($status.JobId)" -Verbose
 $status | Get-XDscConfigurationDetail -Verbose 
 
+# get the status for a failed example
+$status = @(Get-DscConfigurationStatus -all).where{$_.Status -eq 'Failure'}  
+
 # Show resource not in derised state
 $status.ResourcesNotInDesiredState
