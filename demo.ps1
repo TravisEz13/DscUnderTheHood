@@ -19,4 +19,4 @@ $status.ResourcesNotInDesiredState
 # get the verbose details of the status
 $status | Get-XDscConfigurationDetail -Verbose
 
-@(Get-DscConfigurationStatus -all).where{$_.metadata -match 'name: examplereboot' -and $_.type -eq 'Initial'} | Get-XDscConfigurationDetail -Verbose 
+@(Get-DscConfigurationStatus -all).where{$_.Type -eq 'Reboot'} | Get-XDscConfigurationDetail -Verbose 
