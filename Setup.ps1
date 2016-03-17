@@ -11,7 +11,7 @@ Get-NetAdapter | %{Set-NetConnectionProfile  -InterfaceAlias $_.Name -NetworkCat
 Set-WSManQuickConfig -Force
 $rebootFile = "$env:SystemDrive\rebooted.txt"
 $failOnceFile = "$env:SystemDrive\failed.txt"
-if($reboot -or @(Get-DscConfigurationStatus -all).where{$_.type -eq 'reboot'}.Status -ne 'Success')
+if(!$reboot -and @(Get-DscConfigurationStatus -all).where{$_.type -eq 'reboot'}.Status -ne 'Success')
 {
     throw 'Reboot example has not been setup'
 }
