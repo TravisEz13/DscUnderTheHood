@@ -219,3 +219,7 @@ Write-Host -Fore $promptColor $(
 Write-Host -Fore $promptColor $([DateTime]::now)
 Write-Host
 }
+
+function Clear-HostForegroundColor {
+    $host.UI.RawUI.ForegroundColor= [ConsoleColor]::White
+}
