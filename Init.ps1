@@ -13,8 +13,17 @@ if($cert.Count -ge 1)
     $global:DscEncryptionCert = $cert
 }
 else {
-    $cert = New-SelfSignedCertificate -Type DocumentEncryptionCert -KeyUsage @('KeyEncipherment', 'DataEncipherment') -DnsName 'DscEncryptionCert'                                                                                 
-    $cert |Export-Certificate -FilePath "$env:temp\DscPublicKey.cer"                                                                                                                                                               
-    Import-Certificate -FilePath "$env:temp\DscPublicKey.cer" -CertStoreLocation Cert:\LocalMachine\Root
+    <#$rootCert = New-SelfSignedCertificate  -Type Custom -DnsName 'DscEncryptionSelfSignedCa' -CertStoreLocation Cert:\LocalMachine\my -KeyUsage CertSign
+    $cert = New-SelfSignedCertificate -Type DocumentEncryptionCert -DnsName 'DscEncryptionCert' -Signer $rootCert#>
+    $cert = New-SelfSignedCertificate -Type DocumentEncryptionCert -DnsName 'DscEncryptionCert' 
+    $cert | Export-Certificate -FilePath "$env:temp\DscPublicKey.cer"  -Force                                                              
+    #$rootCert |Export-Certificate -FilePath "$env:temp\DscCaPublicKey.cer"  -Force                                                                                                                                                             
+    Import-Certificate -FilePath "$env:temp\DscPublicKey.cer" -CertStoreLocation Cert:\LocalMachine\Root > $null
     $global:DscEncryptionCert = $cert
+    
+    <#if(!($cert|Test-Certificate -EKU @('1.3.6.1.4.1.311.80.1') -DNSName DscEncryptionCert))#>
+    if(!($cert.Verify()))
+    {
+        throw 'certificate setup failed'
+    } 
 }
