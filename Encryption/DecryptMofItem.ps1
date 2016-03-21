@@ -1,0 +1,1 @@
+Unprotect-CmsMessage -Content '-----BEGIN CMS----------END CMS-----'.replace('\n','') -to $Global:DscEncryptionCert.Thumbprint
