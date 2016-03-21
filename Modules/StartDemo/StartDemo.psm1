@@ -44,22 +44,34 @@ param(
   [System.ConsoleColor]$commentColor='Green', 
   [switch]$FullAuto,
   [int]$AutoSpeed = 3,
-  [switch]$PauseAfterExecute
+  [switch]$PauseAfterExecute,
+  [switch]$ShowProgress
 )
-
+if($ShowProgress)
+{
+    $Script:ProgressPreference = 'Continue'
+}
+else {
+   $Script:ProgressPreference = 'SilentlyContinue' 
+}
 $RawUI = $Host.UI.RawUI
 $hostWidth = $RawUI.BufferSize.Width
 
 # A function for reading in a character 
 function Read-Char() {
   $_OldColor = $RawUI.ForeGroundColor
-  $RawUI.ForeGroundColor = 'Red'
-  $inChar=$RawUI.ReadKey('IncludeKeyUp')
-  # loop until they press a character, so Shift or Ctrl, etc don't terminate us
-  while($inChar.Character -eq 0){
+  try{
+    $RawUI.ForeGroundColor = 'Red'
     $inChar=$RawUI.ReadKey('IncludeKeyUp')
+    # loop until they press a character, so Shift or Ctrl, etc don't terminate us
+    while($inChar.Character -eq 0){
+        $inChar=$RawUI.ReadKey('IncludeKeyUp')
+    }
   }
-  $RawUI.ForeGroundColor = $_OldColor
+  finally
+  {
+    $RawUI.ForeGroundColor = $_OldColor
+  }
   return $inChar.Character
 }
 
@@ -218,8 +230,4 @@ Write-Host -Fore $promptColor $(
    $dur.Hours, $dur.Minutes, $dur.Seconds, [DateTime]::Now.ToLongTimeString())
 Write-Host -Fore $promptColor $([DateTime]::now)
 Write-Host
-}
-
-function Clear-HostForegroundColor {
-    $host.UI.RawUI.ForegroundColor= [ConsoleColor]::White
 }
