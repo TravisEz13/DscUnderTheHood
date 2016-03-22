@@ -27,3 +27,4 @@ else {
         throw 'certificate setup failed'
     } 
 }
+Write-Verbose "Using cert: $($global:DscEncryptionCert.Thumbprint)" -Verbose
