@@ -14,7 +14,7 @@ Configuration EncryptedCredential
         [PSCredential]
         $runAsCredential 
     )
-
+    $username = $runAsCredential.GetNetworkCredential().UserName 
     Import-DscResource -ModuleName xPSDesiredStateConfiguration    
     Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
     
@@ -22,6 +22,15 @@ Configuration EncryptedCredential
     {
         # Script resource running as LCM
         # not using credentials
+        User testUser
+        {
+            Ensure = 'Present'
+            UserName = $runAsCredential.GetNetworkCredential().UserName
+            PasswordChangeRequired = $false
+            PasswordChangeNotAllowed = $true
+            Disabled = $false
+            Password = $runAsCredential
+        }
         Script DontRunAs
         {
             GetScript = {
@@ -55,19 +64,6 @@ Configuration EncryptedCredential
                 }
             PsDscRunAsCredential = $runAsCredential
         }
-        xPackage VsCode
-        { 
-            Name =  'VsCode'
-            Path = (Resolve-uri -uri 'https://go.microsoft.com/fwlink/?LinkID=623230') 
-            ProductId = ''
-            Arguments = '-s'
-            InstalledCheckRegHive = 'CurrentUser' 
-            InstalledCheckRegKey = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\Code' 
-            InstalledCheckRegValueName = 'DisplayName'
-            InstalledCheckRegValueData = 'Code' 
-            PsDscRunAsCredential = $runAsCredential
-        }
-        
     }
 }
 
