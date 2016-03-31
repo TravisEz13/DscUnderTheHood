@@ -1,12 +1,18 @@
 [String] $moduleRoot = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
-Register-PSRepository -Name xDscDiagnostics -SourceLocation https://ci.appveyor.com/nuget/xDscDiagnostics -ErrorAction SilentlyContinue
-Install-Module xDscDiagnostics -Repository xDscDiagnostics -force
+Write-Verbose 'Updating modules' -Verbose
+Register-PSRepository -Name xDscDiagnostics -SourceLocation https://ci.appveyor.com/nuget/xDscDiagnostics -ErrorAction SilentlyContinue -InstallationPolicy Trusted
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+Install-Module xDscDiagnostics -Repository xDscDiagnostics
+Install-Module xPSDesiredStateConfiguration -Repository PSGallery
 
+Write-Verbose 'Enabling WSMan' -Verbose
 Get-NetAdapter | %{Set-NetConnectionProfile  -InterfaceAlias $_.Name -NetworkCategory Private -erroraction SilentlyContinue}
 Set-WSManQuickConfig -Force > $null
 
+Write-Verbose 'Adding demo modules to path' -Verbose
 $env:psmodulePath = "$env:psmodulePath;$moduleroot\modules"
 
+Write-Verbose 'Setting up encryption cert' -Verbose
 $cert = @(dir Cert:\LocalMachine\My).where{$_ |Test-Certificate -EKU @('1.3.6.1.4.1.311.80.1') -DNSName DscEncryptionCert -ErrorAction SilentlyContinue -WarningAction SilentlyContinue }
 if($cert.Count -ge 1)
 {
