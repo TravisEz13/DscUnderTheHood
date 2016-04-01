@@ -16,29 +16,18 @@ $status
 # Type: Initial, Reboot, Consistency
 $status | fl *
 
-# show the meta configuration
-$status.MetaConfiguration
 # show the Resource details
 
 $status.ResourcesInDesiredState
+
+# get the status for a failed example
+
+$status = @(Get-DscConfigurationStatus -all | sort-object -property startdate).where{$_.Status -eq 'Failure'} | Select-Object -First 1
+
+# Show resource not in derised state
+$status.ResourcesNotInDesiredState
 
 # get the verbose details of the status
 # using Get-XDscConfigurationDetail from xDscDiagnostics
 Write-Verbose -Message "JobId: $($status.JobId)" -Verbose
 $status | Get-XDscConfigurationDetail -Verbose
-
-# get the status for a reboot example
-$status = @(Get-DscConfigurationStatus -all).where{$_.Type -eq 'Reboot'}  
-
-# get the verbose details for the reboot example
-Write-Verbose -Message "JobId: $($status.JobId)" -Verbose
-$status | Get-XDscConfigurationDetail -Verbose 
-
-# Show all the files backing Get-ConfigurationStatus for this job
-dir "C:\WINDOWS\System32\Configuration\ConfigurationStatus\$($status.JobId)*"
-
-# get the status for a failed example
-$status = @(Get-DscConfigurationStatus -all | sort-object -property startdate).where{$_.Status -eq 'Failure'} | Select-Object -First 1
-
-# Show resource not in derised state
-$status.ResourcesNotInDesiredState
