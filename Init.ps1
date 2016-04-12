@@ -19,7 +19,7 @@ if($cert.Count -ge 1)
     $global:DscEncryptionCert = $cert
 }
 else {
-    $cert = New-SelfSignedCertificate -Type DocumentEncryptionCertLegacyCsp -DnsName 'DscEncryptionCert' 
+    $cert = New-SelfSignedCertificate -Type DocumentEncryptionCertLegacyCsp -DnsName 'DscEncryptionCert' -KeyAlgorithm -HashAlgorithm SHA256
     # DocumentEncryptionCertLegacyCsp implies -Provider "Microsoft RSA SChannel Cryptographic Provider"
     $cert | Export-Certificate -FilePath "$env:temp\DscPublicKey.cer"  -Force                                                              
     Import-Certificate -FilePath "$env:temp\DscPublicKey.cer" -CertStoreLocation Cert:\LocalMachine\Root > $null
