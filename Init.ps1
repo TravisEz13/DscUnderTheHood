@@ -6,6 +6,7 @@ Install-Module xDscDiagnostics -Repository xDscDiagnostics
 Install-Module xPSDesiredStateConfiguration -Repository PSGallery
 
 Write-Verbose 'Enabling WSMan' -Verbose
+# Set-WSManQuickConfig wants the Net adapters to be private
 Get-NetAdapter | %{Set-NetConnectionProfile  -InterfaceAlias $_.Name -NetworkCategory Private -erroraction SilentlyContinue}
 Set-WSManQuickConfig -Force > $null
 
