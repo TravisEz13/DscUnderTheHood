@@ -1,3 +1,6 @@
+# Presentation Recording
+[PowerShell Summit 2016 North America](https://www.youtube.com/watch?v=eGrOp-p4gOM&index=15&list=PLfeA8kIs7Coc1Jn5hC4e_XgbFUaS5jY2i)
+
 #  Machine setup
 First run setup with reboot, this will clear any history so it must be done first.
 Note: ** It will automatically reboot the machine **
