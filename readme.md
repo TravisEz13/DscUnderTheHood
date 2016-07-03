@@ -1,6 +1,9 @@
 # Presentation Recording
 [PowerShell Summit 2016 North America](https://www.youtube.com/watch?v=eGrOp-p4gOM&index=15&list=PLfeA8kIs7Coc1Jn5hC4e_XgbFUaS5jY2i)
 
+# Presentation Slides
+Slide are available in this [zip File](https://powershell.org/wp-content/uploads/2016/05/Slides2016.zip) in the sub folder `\DSC - Under the hood\DSC - Under the hood.pptx`.
+
 #  Machine setup
 First run setup with reboot, this will clear any history so it must be done first.
 Note: ** It will automatically reboot the machine **
